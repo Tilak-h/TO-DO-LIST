@@ -1,6 +1,78 @@
-# Welcome to Your Miaoda Project
+# TaskFlow - Mobile To-Do List Application
 
 ## Project Info
+
+TaskFlow is a modern, mobile-first to-do list application that helps you manage your tasks efficiently. Built with React, TypeScript, and Supabase, it features user authentication, task prioritization, and a beautiful, intuitive interface.
+
+### Key Features
+
+- **User Authentication**: Secure registration and login with username/password
+- **Task Management**: Create, complete, and delete tasks with ease
+- **Priority Levels**: Organize tasks by High, Medium, or Low priority
+- **Task Details**: Add descriptions, date/time, and deadlines to your tasks
+- **Status Tracking**: View all tasks, pending tasks, or completed tasks separately
+- **Mobile-First Design**: Optimized for mobile devices with a clean, card-based layout
+- **Real-time Updates**: Instant synchronization with Supabase backend
+
+### Design Highlights
+
+- **Color Scheme**: Deep blue primary color with priority-based color coding
+  - High Priority: Orange
+  - Medium Priority: Yellow
+  - Low Priority: Blue
+  - Completed: Green
+- **Modern UI**: 12px border radius for cards and buttons, subtle shadows, and smooth animations
+- **Responsive**: Works seamlessly on all screen sizes
+
+## Getting Started
+
+### First Time Setup
+
+1. **Register an Account**
+   - Open the application
+   - Click "Sign up" on the login page
+   - Enter a username (letters, digits, and underscores only)
+   - Create a password (minimum 6 characters)
+   - Click "Sign Up" to create your account
+
+2. **Login**
+   - Enter your username and password
+   - Click "Sign In"
+   - You'll be redirected to your task list
+
+### Using TaskFlow
+
+#### Adding a Task
+1. Click the "Add Task" button (blue button with plus icon)
+2. Fill in the task details:
+   - **Title** (required): Brief description of the task
+   - **Description** (optional): Additional details
+   - **Priority**: Choose High, Medium, or Low
+   - **Date & Time** (optional): When you plan to work on it
+   - **Deadline** (optional): When it needs to be completed
+3. Click "Add Task" to save
+
+#### Managing Tasks
+- **Complete a Task**: Click the checkbox next to the task title
+- **Delete a Task**: Click the "Delete" button and confirm
+- **View by Status**: Use the tabs to filter:
+  - All: See all your tasks
+  - Pending: Only incomplete tasks
+  - Completed: Only finished tasks
+
+#### Task Information
+Each task card displays:
+- Title and description
+- Priority badge (color-coded)
+- Date/time and deadline (if set)
+- Completion status
+- Overdue indicator (if past deadline)
+
+### User Account
+- View your username in the top-right corner
+- Click the user icon to access:
+  - Your email address
+  - Sign out option
 
 ## Project Directory
 

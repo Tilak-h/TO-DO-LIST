@@ -66,6 +66,11 @@ export default {
                 success: 'hsl(var(--success))',
                 warning: 'hsl(var(--warning))',
                 info: 'hsl(var(--info))',
+                priority: {
+                  high: 'hsl(var(--priority-high))',
+                  medium: 'hsl(var(--priority-medium))',
+                  low: 'hsl(var(--priority-low))'
+                },
                 sidebar: {
                     DEFAULT: 'hsl(var(--sidebar-background))',
                     background: 'hsl(var(--sidebar-background))',
