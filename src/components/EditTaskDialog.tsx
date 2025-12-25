@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -7,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,19 +18,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
-import type { TaskPriority, Category } from '@/types/types';
-import type { CreateTaskInput } from '@/db/api';
+import type { Task, TaskPriority, Category } from '@/types/types';
+import type { UpdateTaskInput } from '@/db/api';
 import CategorySelector from './CategorySelector';
+import { format } from 'date-fns';
 
-interface AddTaskDialogProps {
-  onAddTask: (task: CreateTaskInput) => Promise<void>;
+interface EditTaskDialogProps {
+  task: Task | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdateTask: (taskId: string, input: UpdateTaskInput) => Promise<void>;
   categories: Category[];
   onCreateCategory: () => void;
 }
 
-export default function AddTaskDialog({ onAddTask, categories, onCreateCategory }: AddTaskDialogProps) {
-  const [open, setOpen] = useState(false);
+export default function EditTaskDialog({
+  task,
+  open,
+  onOpenChange,
+  onUpdateTask,
+  categories,
+  onCreateCategory,
+}: EditTaskDialogProps) {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -40,67 +48,57 @@ export default function AddTaskDialog({ onAddTask, categories, onCreateCategory 
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
 
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setDateTime('');
-    setDeadline('');
-    setPriority('medium');
-    setCategoryIds([]);
-  };
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description || '');
+      setDateTime(task.date_time ? format(new Date(task.date_time), "yyyy-MM-dd'T'HH:mm") : '');
+      setDeadline(task.deadline ? format(new Date(task.deadline), 'yyyy-MM-dd') : '');
+      setPriority(task.priority);
+      setCategoryIds(task.categories?.map(c => c.id) || []);
+    }
+  }, [task]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) {
-      return;
-    }
+    if (!task || !title.trim()) return;
 
     setLoading(true);
     try {
-      await onAddTask({
+      await onUpdateTask(task.id, {
         title: title.trim(),
         description: description.trim() || undefined,
         date_time: dateTime || undefined,
         deadline: deadline || undefined,
         priority,
-        categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
+        categoryIds,
       });
-      resetForm();
-      setOpen(false);
+      onOpenChange(false);
     } catch (error) {
-      console.error('Failed to add task:', error);
+      console.error('Failed to update task:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  if (!task) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) {
-        resetForm();
-      }
-    }}>
-      <DialogTrigger asChild>
-        <Button size="lg" className="rounded-full shadow-lg hover-lift">
-          <Plus className="w-5 h-5 mr-2" />
-          Add Task
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            Create a new task to keep track of your to-dos
+            Update your task details
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="edit-title">Title *</Label>
               <Input
-                id="title"
+                id="edit-title"
                 placeholder="Enter task title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -110,9 +108,9 @@ export default function AddTaskDialog({ onAddTask, categories, onCreateCategory 
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="edit-description">Description</Label>
               <Textarea
-                id="description"
+                id="edit-description"
                 placeholder="Enter task description (optional)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -122,9 +120,9 @@ export default function AddTaskDialog({ onAddTask, categories, onCreateCategory 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="edit-priority">Priority</Label>
               <Select value={priority} onValueChange={(value) => setPriority(value as TaskPriority)} disabled={loading}>
-                <SelectTrigger id="priority">
+                <SelectTrigger id="edit-priority">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -146,9 +144,9 @@ export default function AddTaskDialog({ onAddTask, categories, onCreateCategory 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dateTime">Date & Time</Label>
+              <Label htmlFor="edit-dateTime">Date & Time</Label>
               <Input
-                id="dateTime"
+                id="edit-dateTime"
                 type="datetime-local"
                 value={dateTime}
                 onChange={(e) => setDateTime(e.target.value)}
@@ -157,9 +155,9 @@ export default function AddTaskDialog({ onAddTask, categories, onCreateCategory 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deadline">Deadline</Label>
+              <Label htmlFor="edit-deadline">Deadline</Label>
               <Input
-                id="deadline"
+                id="edit-deadline"
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
@@ -168,11 +166,11 @@ export default function AddTaskDialog({ onAddTask, categories, onCreateCategory 
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !title.trim()}>
-              {loading ? 'Adding...' : 'Add Task'}
+              {loading ? 'Updating...' : 'Update Task'}
             </Button>
           </DialogFooter>
         </form>
@@ -180,4 +178,3 @@ export default function AddTaskDialog({ onAddTask, categories, onCreateCategory 
     </Dialog>
   );
 }
-

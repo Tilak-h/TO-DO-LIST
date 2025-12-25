@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, Clock, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Trash2, Edit } from 'lucide-react';
 import type { Task } from '@/types/types';
 import { format } from 'date-fns';
 import {
@@ -16,11 +16,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { getUrgencyLabel, getUrgencyColor } from '@/lib/taskSort';
 
 interface TaskCardProps {
   task: Task;
   onToggleComplete: (taskId: string, completed: boolean) => void;
   onDelete: (taskId: string) => void;
+  onEdit?: (task: Task) => void;
 }
 
 const priorityColors = {
@@ -35,11 +37,13 @@ const priorityLabels = {
   low: 'Low Priority',
 };
 
-export default function TaskCard({ task, onToggleComplete, onDelete }: TaskCardProps) {
+export default function TaskCard({ task, onToggleComplete, onDelete, onEdit }: TaskCardProps) {
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !task.completed;
+  const urgencyLabel = getUrgencyLabel(task);
+  const urgencyColor = getUrgencyColor(task);
 
   return (
-    <Card className={`transition-all hover:shadow-md ${task.completed ? 'opacity-60' : ''}`}>
+    <Card className={`transition-all hover:shadow-lg hover-lift animate-slide-up ${task.completed ? 'opacity-60' : ''}`}>
       <CardContent className="pt-6 pb-4">
         <div className="flex items-start gap-3">
           <Checkbox
@@ -48,19 +52,46 @@ export default function TaskCard({ task, onToggleComplete, onDelete }: TaskCardP
             className="mt-1"
           />
           <div className="flex-1 space-y-2">
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-2 flex-wrap">
               <h3 className={`font-semibold text-lg ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
                 {task.title}
               </h3>
-              <Badge className={priorityColors[task.priority]}>
-                {priorityLabels[task.priority]}
-              </Badge>
+              <div className="flex items-center gap-2 flex-wrap">
+                {urgencyLabel && (
+                  <Badge variant="outline" className={`${urgencyColor} border-current`}>
+                    {urgencyLabel}
+                  </Badge>
+                )}
+                <Badge className={priorityColors[task.priority]}>
+                  {priorityLabels[task.priority]}
+                </Badge>
+              </div>
             </div>
             
             {task.description && (
               <p className={`text-sm ${task.completed ? 'line-through text-muted-foreground' : 'text-muted-foreground'}`}>
                 {task.description}
               </p>
+            )}
+
+            {task.categories && task.categories.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {task.categories.map(category => (
+                  <Badge
+                    key={category.id}
+                    variant="outline"
+                    style={{ 
+                      borderColor: category.color,
+                      color: category.color,
+                      backgroundColor: `${category.color}15`
+                    }}
+                    className="text-xs"
+                  >
+                    {category.icon && <span className="mr-1">{category.icon}</span>}
+                    {category.name}
+                  </Badge>
+                ))}
+              </div>
             )}
 
             <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
@@ -87,7 +118,18 @@ export default function TaskCard({ task, onToggleComplete, onDelete }: TaskCardP
           </div>
         </div>
       </CardContent>
-      <CardFooter className="pt-0 pb-4">
+      <CardFooter className="pt-0 pb-4 gap-2">
+        {onEdit && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(task)}
+            className="text-primary hover:text-primary hover:bg-primary/10"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
+          </Button>
+        )}
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
