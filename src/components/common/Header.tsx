@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { ThemeCustomizer } from '@/components/ThemeCustomizer';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -30,32 +31,35 @@ export default function Header() {
           <h1 className="text-xl font-bold">TaskFlow</h1>
         </div>
 
-        {user && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">
-                    {profile?.username || 'User'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {profile?.email || user.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeCustomizer />
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">
+                      {profile?.username || 'User'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {profile?.email || user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
     </header>
   );
